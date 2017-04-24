@@ -1,65 +1,38 @@
 from pythonTestFramework.Loger.Loger import Loger
-from ListenerMQ import ListenerMQ
 from pythonTestFramework.Generation.GenerationData import GenerationData
-from pythonTestFramework.MQ.RabbitMQ import RabbitMQClient
-from pythonTestFramework.Serialization.ProtoBufSerializer import ProtoBufSerializer
-from threading import Thread
 import time
-from threading import Timer
 from Config import Config
-
+import random
 
 class GeneratorQuote():
     def __init__(self):
         self._loger = Loger()
         self.confObj = Config()
         self.__gen = GenerationData()
-        self.__serializer = ProtoBufSerializer()
-
-    def __startListenerMQ(self):
-        try:
-            listener = Thread(target=ListenerMQ().start, args=(self.mq,
-                                                               self.confObj.exchangeName,
-                                                               self.confObj.exchangeType,
-                                                               self.confObj.queueName,
-                                                               self.confObj.routingKey))
-            listener.setDaemon(True)
-            listener.start()
-        except Exception as ex:
-            print ex.message
-            self._loger.error(self, exception=ex)
-
-    def __prepeareDB(self):
-        try:
-            self.mq = RabbitMQClient()
-            self.mq.connect()
-            self.mq.createExchange(self.confObj.exchangeName, self.confObj.exchangeType)
-            self.mq.createQueue(self.confObj.queueName)
-            self.mq.bindQueue(self.confObj.exchangeName, self.confObj.queueName, self.confObj.routingKey)
-        except Exception as ex:
-            print ex.message
-            self._loger.error(self, exception=ex)
+        self.confObj.countAllElementsToMQ = 0
 
     def genQuotes(self):
         try:
-            self.__startTime = time.time()
-            currentTime = time.time()
-            if currentTime - self.__startTime < self.confObj.totalTimeForGenerationQuotes:
-                for i in range(1, self.confObj.countQuotesOnSecond):
-                    self.__publishMessage(self.__gen.generate_data('MarketDepth'))
+            for i in range(0, self.confObj.totalTimeForGenerationQuotes):
+                listQuotes = []
+                for i in range(0, random.randint(self.confObj.countQuotesOnSecond['min'], self.confObj.countQuotesOnSecond['max'])):
+                    quota = self.__gen.generate_data('MarketDepth')
+                    listQuotes.append(quota)
                     self.confObj.countAllElementsToMQ += 1
-
-    def __publishMessage(self, data):
-        try:
-            messageBody = self.__serializer.serialaze('MarketDepth', data)
-            self.mq.sendMessage(self.confObj.exchangeName, self.confObj.routingKey, messageBody)
+                marketDepthList = {
+                    'timeStamp': int(time.time()),
+                    'nodeId': 'test',
+                    'unitName': 'unit1',
+                    'instanceId': 'test',
+                    'marketDepth': listQuotes
+                }
+                self.adapter.publishMessage(marketDepthList)
+                time.sleep(1)
         except Exception as ex:
             print ex.message
             self._loger.error(self, exception=ex)
 
-    def start(self):
-        self.__prepeareDB()
-        self.__startListenerMQ()
+
+    def start(self, objAdapter):
+        self.adapter = objAdapter
         self.genQuotes()
-        time.sleep(self.confObj.waitGenerator)
-        self.mq.disconnect()

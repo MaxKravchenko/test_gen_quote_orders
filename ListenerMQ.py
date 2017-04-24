@@ -13,23 +13,22 @@ class ListenerMQ():
         self.__listOrders = Queue.Queue()
         self.__serializer = ProtoBufSerializer()
         self.__gen = GenerationData()
+        self.confObj.countAllElementsFromMQ = 0
 
     def start(self, mq, exchangeName, exchangeType, queueName, routingKey):
         try:
             mq.start_consuming(exchangeName, exchangeType, queueName, routingKey, self.callbackReciveQuote)
-
-            # timer = Timer(self.confObj.waitListenerHandler, self.__handlerQuotes)
-            # timer.start()
         except Exception as ex:
             print ex.message
             self._loger.error(self, exception=ex)
 
     def callbackReciveQuote(self, ch, method, properties, body):
         try:
-            quote = self.__serializer.deserialaze('MarketDepth', body)
-            self.__listQuotes.put(quote)
-            self.confObj.countAllElementsFromMQ += 1
-            print quote
+            marketDepthList = self.__serializer.deserialaze('MarketDepthList', body)
+            for quote in marketDepthList['marketDepth']:
+                self.__listQuotes.put(quote)
+                self.confObj.countAllElementsFromMQ += 1
+                print quote
         except Exception as ex:
             print ex.message
             self._loger.error(self, exception=ex)

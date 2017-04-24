@@ -10,14 +10,15 @@ class myLauncher(Launcher):
     def start(self):
         try:
             self.gen = GenerationData()
-            quote = self.gen.generate_data('Order')
-            print quote
-            print int(time.time())
-            print int(time.time()*1000)
-            print datetime.datetime.utcnow()
+            entity = self.gen.generate_data('Order')
+            print entity
+            # print entity['bid']['quote'][0]['volume']
+            # print int(time.time())
+            # print int(time.time()*1000)
+            # print datetime.datetime.utcnow()
 
-            self.__timer = Timer(1, self.f)
-            self.__timer.start()
+            # self.__timer = Timer(1, self.f)
+            # self.__timer.start()
 
         except Exception as ex:
             print ex.message

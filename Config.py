@@ -16,9 +16,9 @@ class Config(object):
         self.waitListenerHandler = 1.0
         self.countAllElementsToMQ = 0
         self.countAllElementsFromMQ = 0
-        self.countQuotesOnSecond = 40
+        self.countQuotesOnSecond = {'min': 5, 'max': 5}
         self.countQuotesForOneOrder = 100
         self.sizeQuota = 80
         self.sizeOrder = 48
-        self.totalTimeForGenerationQuotes = 4
+        self.totalTimeForGenerationQuotes = 1
         self.timeForGenerationQuotes = 1
