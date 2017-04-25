@@ -10,8 +10,14 @@ class myLauncher(Launcher):
     def start(self):
         try:
             self.gen = GenerationData()
-            entity = self.gen.generate_data('Order')
-            print entity
+
+            entity = self.gen.generate_data('MarketDepth')
+            print entity['provider']
+            print entity['timeStamp']
+            print entity['currencyPair']
+            print entity['bid']['quote'][0]['volume']
+
+
             # print entity['bid']['quote'][0]['volume']
             # print int(time.time())
             # print int(time.time()*1000)

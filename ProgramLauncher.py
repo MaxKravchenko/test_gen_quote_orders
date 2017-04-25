@@ -5,16 +5,16 @@ from AdapterMQ import AdapterMQ
 import time
 from Config import Config
 
-
 class ProgramLauncher(Launcher):
     def start(self):
         try:
             self.confObj = Config()
-            self.adapter = AdapterMQ()
-            self.adapter.start()
-            GeneratorQuote().start(self.adapter)
+            self.adapterMQ = AdapterMQ()
+            self.adapterMQ.start()
+            GeneratorQuote().start(self.adapterMQ)
+            time.sleep(5)
             Launcher().start()
-            self.adapter.disconnect()
+            self.adapterMQ.disconnect()
         except Exception as ex:
             print ex.message
 

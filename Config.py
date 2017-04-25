@@ -16,9 +16,15 @@ class Config(object):
         self.waitListenerHandler = 1.0
         self.countAllElementsToMQ = 0
         self.countAllElementsFromMQ = 0
-        self.countQuotesOnSecond = {'min': 5, 'max': 5}
+        self.countQuotesOnSecond = {'min': 30, 'max': 40}
         self.countQuotesForOneOrder = 100
+        self.countOrdersForSave = 5
         self.sizeQuota = 80
         self.sizeOrder = 48
-        self.totalTimeForGenerationQuotes = 1
+        self.totalTimeForGenerationQuotes = 30
         self.timeForGenerationQuotes = 1
+        self.mySQL = {'host': '127.0.0.1',
+              'port': 3306,
+              'user': 'root',
+              'password': 'cat',
+              'db': 'trade_db'}

@@ -26,7 +26,7 @@ class GeneratorQuote():
                     'instanceId': 'test',
                     'marketDepth': listQuotes
                 }
-                self.adapter.publishMessage(marketDepthList)
+                self.adapterMQ.publishMessage(marketDepthList)
                 time.sleep(1)
         except Exception as ex:
             print ex.message
@@ -34,5 +34,5 @@ class GeneratorQuote():
 
 
     def start(self, objAdapter):
-        self.adapter = objAdapter
+        self.adapterMQ = objAdapter
         self.genQuotes()
