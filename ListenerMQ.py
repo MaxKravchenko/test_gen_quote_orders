@@ -7,6 +7,9 @@ from Config import Config
 from AdapterMySQL import AdapterMySQL
 from pythonTestFramework.Connectors.ConnectToMySQL import ConnectToMySQL
 from threading import Thread
+from datetime import datetime
+import MySQLdb
+
 
 class ListenerMQ():
     def __init__(self):
@@ -50,7 +53,7 @@ class ListenerMQ():
                     listQuotes.append(self.__listQuotes.get())
                     if i == self.confObj.countQuotesForOneOrder - 1:
                         order = self.__gen.generate_data('Order')
-                        # order['timeStamp'] = int(order['timeStamp'] / 1000)
+                        order['timeStamp'] = int(order['timeStamp'] / 1000)
                         if order['tradeType'] == 0:
                             order['initialVolume'] = listQuotes[self.confObj.countQuotesForOneOrder - 1]['bid']['quote'][0]['volume']
                         elif order['tradeType'] == 1:
@@ -70,13 +73,13 @@ class ListenerMQ():
         query = """INSERT INTO quotes    (timestamp, provider, currency_pair, type, volume, price) VALUES (%s, %s, %s, %s, %s, %s)"""
         dataForQuery = []
         for i in range(0, len(listQuotes)):
-            dataForQuery.append((str(listQuotes[i]['timeStamp']),
+            dataForQuery.append((MySQLdb.TimestampFromTicks(listQuotes[i]['timeStamp']),
                             listQuotes[i]['provider'],
                             listQuotes[i]['currencyPair'],
                             'BID',
                             listQuotes[i]['bid']['quote'][0]['volume'],
                             listQuotes[i]['bid']['quote'][0]['price']))
-            dataForQuery.append((str(listQuotes[i]['timeStamp']),
+            dataForQuery.append((MySQLdb.TimestampFromTicks(listQuotes[i]['timeStamp']),
                             listQuotes[i]['provider'],
                             listQuotes[i]['currencyPair'],
                             'OFFER',
@@ -90,7 +93,7 @@ class ListenerMQ():
         query = """INSERT INTO orders (timestamp, status, source_lp, order_id, initial_volume, order_type, trade_type, currency_pair) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
         dataForQuery = []
         for i in range(0, len(listOrders)):
-            dataForQuery.append((str(listOrders[i]['timeStamp']),
+            dataForQuery.append((MySQLdb.TimestampFromTicks(listOrders[i]['timeStamp']),
                             listOrders[i]['status'],
                             listOrders[i]['sourceLp'],
                             listOrders[i]['orderId'],

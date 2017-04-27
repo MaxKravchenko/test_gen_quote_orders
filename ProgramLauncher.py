@@ -12,7 +12,7 @@ class ProgramLauncher(Launcher):
             self.adapterMQ = AdapterMQ()
             self.adapterMQ.start()
             GeneratorQuote().start(self.adapterMQ)
-            time.sleep(5)
+            time.sleep(self.confObj.waitGenerator)
             Launcher().start()
             self.adapterMQ.disconnect()
         except Exception as ex:

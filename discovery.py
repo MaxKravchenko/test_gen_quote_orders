@@ -4,6 +4,8 @@ from pythonTestFramework.Launcher.Launcher import Launcher
 import time
 import datetime
 from threading import Timer
+from datetime import date, datetime
+import MySQLdb
 
 
 class myLauncher(Launcher):
@@ -11,11 +13,15 @@ class myLauncher(Launcher):
         try:
             self.gen = GenerationData()
 
-            entity = self.gen.generate_data('MarketDepth')
-            print entity['provider']
-            print entity['timeStamp']
-            print entity['currencyPair']
-            print entity['bid']['quote'][0]['volume']
+            # entity = self.gen.generate_data('MarketDepth')
+            # print entity['provider']
+            # print entity['timeStamp']
+            # print entity['currencyPair']
+            # print entity['bid']['quote'][0]['volume']
+            # d = datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+            # print d
+            print MySQLdb.Timestamp(time.time())
+            print MySQLdb.TimestampFromTicks(int(time.time()))
 
 
             # print entity['bid']['quote'][0]['volume']

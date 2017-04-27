@@ -9,6 +9,7 @@ from threading import Timer
 from Config import Config
 import random
 
+
 class AdapterMQ():
     def __init__(self):
         self.confObj = Config()
