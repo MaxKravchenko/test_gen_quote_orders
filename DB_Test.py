@@ -1,7 +1,7 @@
 import unittest
 import pythonTestFramework.Generation.GenerationData as gen
 
-class print_test(unittest.TestCase):
+class list_test(unittest.TestCase):
     def test_pass(self):
         print "Hello"
 
