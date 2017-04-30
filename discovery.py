@@ -6,22 +6,28 @@ import datetime
 from threading import Timer
 from datetime import date, datetime
 import MySQLdb
+from pythonTestFramework.Connectors.ConnectToMySQL import ConnectToMySQL
+from Config import Config
 
 
 class myLauncher(Launcher):
     def start(self):
         try:
-            self.gen = GenerationData()
 
-            # entity = self.gen.generate_data('MarketDepth')
+
+            # self.gen = GenerationData()
+            # entity = self.gen.generate_data('MarketDepthList')
+            # print entity
+            print time.time()
+
             # print entity['provider']
             # print entity['timeStamp']
             # print entity['currencyPair']
             # print entity['bid']['quote'][0]['volume']
             # d = datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
             # print d
-            print MySQLdb.Timestamp(time.time())
-            print MySQLdb.TimestampFromTicks(int(time.time()))
+            # print MySQLdb.Timestamp(time.time())
+            # print MySQLdb.TimestampFromTicks(int(time.time()))
 
 
             # print entity['bid']['quote'][0]['volume']

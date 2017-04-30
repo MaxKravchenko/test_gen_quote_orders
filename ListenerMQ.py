@@ -41,8 +41,8 @@ class ListenerMQ():
         try:
             marketDepthList = self.__serializer.deserialaze('MarketDepthList', body)
             for quote in marketDepthList['marketDepth']:
+                quote['timeStampMDL'] = marketDepthList['timeStamp']
                 self.__listQuotes.put(quote)
-                # print quote
                 self.confObj.countAllElementsFromMQ += 1
         except Exception as ex:
             print ex.message
@@ -77,7 +77,7 @@ class ListenerMQ():
                 self.__saveOrdersToDB(listOrders)
 
     def __saveQuotesToDB(self, listQuotes):
-        query = """INSERT INTO quotes    (timestamp, provider, currency_pair, type, volume, price) VALUES (%s, %s, %s, %s, %s, %s)"""
+        query = """INSERT INTO quotes (timestamp, provider, currency_pair, type, volume, price, timeStampMDL) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
         dataForQuery = []
         for i in range(0, len(listQuotes)):
             dataForQuery.append((MySQLdb.TimestampFromTicks(listQuotes[i]['timeStamp']),
@@ -85,13 +85,15 @@ class ListenerMQ():
                             listQuotes[i]['currencyPair'],
                             'BID',
                             listQuotes[i]['bid']['quote'][0]['volume'],
-                            listQuotes[i]['bid']['quote'][0]['price']))
+                            listQuotes[i]['bid']['quote'][0]['price'],
+                            MySQLdb.TimestampFromTicks(listQuotes[i]['timeStampMDL'])))
             dataForQuery.append((MySQLdb.TimestampFromTicks(listQuotes[i]['timeStamp']),
                             listQuotes[i]['provider'],
                             listQuotes[i]['currencyPair'],
                             'OFFER',
                             listQuotes[i]['offer']['quote'][0]['volume'],
-                            listQuotes[i]['offer']['quote'][0]['price']))
+                            listQuotes[i]['offer']['quote'][0]['price'],
+                            MySQLdb.TimestampFromTicks(listQuotes[i]['timeStampMDL'])))
 
         self.cursor.executemany(query, dataForQuery)
         self.adapterMySQL.disconnect()
