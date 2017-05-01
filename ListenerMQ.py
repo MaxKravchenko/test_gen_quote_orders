@@ -25,13 +25,13 @@ class ListenerMQ():
         try:
             self.adapterMySQL = ConnectToMySQL()
             self.cursor = self.adapterMySQL.connect(self.confObj.mySQL)
-            queryTruncateOrders = """TRUNCATE TABLE orders"""
-            self.cursor.execute(queryTruncateOrders)
-            queryTruncateQuotes = """TRUNCATE TABLE quotes"""
-            self.cursor.execute(queryTruncateQuotes)
+            self.cursor.execute(self.confObj.queryTruncateOrders)
+            self.cursor.execute(self.confObj.queryTruncateQuotes)
+
             handlerQuotes = Thread(target=self.__handlerQuotes)
             handlerQuotes.setDaemon(True)
             handlerQuotes.start()
+
             mq.start_consuming(exchangeName, exchangeType, queueName, routingKey, self.callbackReciveQuote)
         except Exception as ex:
             print ex.message
@@ -57,7 +57,7 @@ class ListenerMQ():
                     listQuotes.append(self.__listQuotes.get())
                     if i == self.confObj.countQuotesForOneOrder - 1:
                         order = self.__gen.generate_data('Order')
-                        order['timeStamp'] = int(order['timeStamp'] / 1000)
+                        order['timeStamp'] = MySQLdb.TimestampFromTicks(int(order['timeStamp'] / 1000))
                         order['currencyPair'] = listQuotes[self.confObj.countQuotesForOneOrder - 1]['currencyPair']
                         if order['tradeType'] == 0:
                             order['filledPrice'] = listQuotes[self.confObj.countQuotesForOneOrder - 1]['bid']['quote'][0]['price']
@@ -77,7 +77,6 @@ class ListenerMQ():
                 self.__saveOrdersToDB(listOrders)
 
     def __saveQuotesToDB(self, listQuotes):
-        query = """INSERT INTO quotes (timestamp, provider, currency_pair, type, volume, price, timeStampMDL) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
         dataForQuery = []
         for i in range(0, len(listQuotes)):
             dataForQuery.append((MySQLdb.TimestampFromTicks(listQuotes[i]['timeStamp']),
@@ -95,24 +94,15 @@ class ListenerMQ():
                             listQuotes[i]['offer']['quote'][0]['price'],
                             MySQLdb.TimestampFromTicks(listQuotes[i]['timeStampMDL'])))
 
-        self.cursor.executemany(query, dataForQuery)
+        self.cursor.executemany(self.confObj.queryInsertQuotes, dataForQuery)
         self.adapterMySQL.disconnect()
 
     def __saveOrdersToDB(self, listOrders):
-        query = """INSERT INTO orders (timestamp, status, source_lp, order_id, initial_volume, order_type, trade_type, currency_pair, filledVolume, initialPrice, filledPrice) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         dataForQuery = []
         for i in range(0, len(listOrders)):
-            dataForQuery.append((MySQLdb.TimestampFromTicks(listOrders[i]['timeStamp']),
-                            listOrders[i]['status'],
-                            listOrders[i]['sourceLp'],
-                            listOrders[i]['orderId'],
-                            listOrders[i]['initialVolume'],
-                            listOrders[i]['orderType'],
-                            listOrders[i]['tradeType'],
-                            listOrders[i]['currencyPair'],
-                            listOrders[i]['filledVolume'],
-                            listOrders[i]['initialPrice'],
-                            listOrders[i]['filledPrice']))
-
-        self.cursor.executemany(query, dataForQuery)
+            oneOrder = []
+            for field in self.confObj.orderFillOrder:
+                oneOrder.append(listOrders[i][field])
+            dataForQuery.append(oneOrder)
+        self.cursor.executemany(self.confObj.queryInsertOrders, dataForQuery)
         self.adapterMySQL.disconnect()

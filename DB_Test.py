@@ -10,25 +10,18 @@ class list_test(unittest.TestCase):
 
         self.adapterMySQL = ConnectToMySQL()
         self.cursor = self.adapterMySQL.connect(self.confObj.mySQL)
-        query = 'SELECT AVG(UNIX_TIMESTAMP(create_time) - UNIX_TIMESTAMP(timeStampMDL)) FROM quotes;'
-        self.cursor.execute(query)
+        self.cursor.execute(self.confObj.queryForTestTimeSaveQuota)
         result = self.cursor.fetchone()
+        print''
         print 'Average time for save quota (s) = {0}'.format(round(result[0], 2))
-
 
     def test_metrics(self):
         self.confObj = Config()
-        listQuery = {'maxPriceOrder': 'SELECT MAX(filledPrice) FROM orders',
-                     'minPriceOrder': 'SELECT MIN(filledPrice) FROM orders',
-                     'avgPriceOrder': 'SELECT AVG(filledPrice) FROM orders',
-                     'maxVolumeOrder': 'SELECT MAX(filledVolume) FROM orders',
-                     'minVolumeOrder': 'SELECT MIN(filledVolume) FROM orders',
-                     'avgVolumeOrder': 'SELECT AVG(filledVolume) FROM orders',
-                     'countOrders': 'SELECT COUNT(*) FROM orders'}
         self.adapterMySQL = ConnectToMySQL()
         self.cursor = self.adapterMySQL.connect(self.confObj.mySQL)
 
-        for name, query in listQuery.items():
+        print''
+        for name, query in self.confObj.listQueryForTestMetrics.items():
             self.cursor.execute(query)
             result = self.cursor.fetchone()
-            print 'dd {0} = {1}'.format(name, round(result[0], 2))
+            print '{0} = {1}'.format(name, round(result[0], 2))
