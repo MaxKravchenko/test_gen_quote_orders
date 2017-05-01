@@ -24,7 +24,7 @@ class Config(object):
         self.countOrdersForSave = 10
         # self.sizeQuota = 80
         # self.sizeOrder = 48
-        self.totalTimeForGenerationQuotes = 60
+        self.totalTimeForGenerationQuotes = 3200
         # self.timeForGenerationQuotes = 1
         self.mySQL = {'host': '127.0.0.1',
               'port': 3306,
@@ -63,6 +63,7 @@ class Config(object):
                                'filledVolume',
                                'initialPrice',
                                'filledPrice')
+
         self.listQueryForTestMetrics = {'maxPriceOrder': 'SELECT MAX(filledPrice) FROM orders',
                      'minPriceOrder': 'SELECT MIN(filledPrice) FROM orders',
                      'avgPriceOrder': 'SELECT AVG(filledPrice) FROM orders',
@@ -70,4 +71,6 @@ class Config(object):
                      'minVolumeOrder': 'SELECT MIN(filledVolume) FROM orders',
                      'avgVolumeOrder': 'SELECT AVG(filledVolume) FROM orders',
                      'countOrders': 'SELECT COUNT(*) FROM orders'}
-        self.queryForTestTimeSaveQuota = 'SELECT AVG(UNIX_TIMESTAMP(create_time) - UNIX_TIMESTAMP(timeStampMDL)) FROM quotes;'
+
+        self.queryForTestTimeSaveQuota = {'avgTimeSaveQuota': 'SELECT AVG(UNIX_TIMESTAMP(create_time) - UNIX_TIMESTAMP(timeStampMDL)) FROM quotes',
+                     'countQuotes': 'SELECT COUNT(*) FROM quotes'}

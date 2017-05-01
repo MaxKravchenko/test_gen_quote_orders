@@ -23,15 +23,15 @@ class ListenerMQ():
 
     def start(self, mq, exchangeName, exchangeType, queueName, routingKey):
         try:
+            #connect to mysql and clear tables
             self.adapterMySQL = ConnectToMySQL()
             self.cursor = self.adapterMySQL.connect(self.confObj.mySQL)
             self.cursor.execute(self.confObj.queryTruncateOrders)
             self.cursor.execute(self.confObj.queryTruncateQuotes)
-
+            #start handler quotes
             handlerQuotes = Thread(target=self.__handlerQuotes)
             handlerQuotes.setDaemon(True)
             handlerQuotes.start()
-
             mq.start_consuming(exchangeName, exchangeType, queueName, routingKey, self.callbackReciveQuote)
         except Exception as ex:
             print ex.message
@@ -41,7 +41,7 @@ class ListenerMQ():
         try:
             marketDepthList = self.__serializer.deserialaze('MarketDepthList', body)
             for quote in marketDepthList['marketDepth']:
-                quote['timeStampMDL'] = marketDepthList['timeStamp']
+                quote['timeStampMDL'] = marketDepthList['timeStamp']/1000
                 self.__listQuotes.put(quote)
                 self.confObj.countAllElementsFromMQ += 1
         except Exception as ex:
@@ -51,6 +51,7 @@ class ListenerMQ():
     def __handlerQuotes(self):
         while True:
             time.sleep(1)
+            #handler quotes
             if self.__listQuotes.qsize() >= self.confObj.countQuotesForOneOrder:
                 listQuotes = []
                 for i in range(0, self.confObj.countQuotesForOneOrder):
@@ -66,9 +67,8 @@ class ListenerMQ():
                             order['filledPrice'] = listQuotes[self.confObj.countQuotesForOneOrder - 1]['offer']['quote'][0]['price']
                             order['filledVolume'] = listQuotes[self.confObj.countQuotesForOneOrder - 1]['offer']['quote'][0]['volume']
                         self.__listOrders.put(order)
-
                 self.__saveQuotesToDB(listQuotes)
-
+            #handler orders
             if self.__listOrders.qsize() >= self.confObj.countOrdersForSave:
                 listOrders = []
                 for i in range(0, self.confObj.countOrdersForSave):

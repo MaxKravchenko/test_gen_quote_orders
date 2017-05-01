@@ -10,10 +10,12 @@ class list_test(unittest.TestCase):
 
         self.adapterMySQL = ConnectToMySQL()
         self.cursor = self.adapterMySQL.connect(self.confObj.mySQL)
-        self.cursor.execute(self.confObj.queryForTestTimeSaveQuota)
-        result = self.cursor.fetchone()
+
         print''
-        print 'Average time for save quota (s) = {0}'.format(round(result[0], 2))
+        for name, query in self.confObj.queryForTestTimeSaveQuota.items():
+            self.cursor.execute(query)
+            result = self.cursor.fetchone()
+            print '{0} = {1}'.format(name, round(result[0], 2))
 
     def test_metrics(self):
         self.confObj = Config()
